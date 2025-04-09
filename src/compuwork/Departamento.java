@@ -4,12 +4,23 @@ import java.util.ArrayList;
 
 public class Departamento {
 
+    private static int contador = 1;
+    private Empresa empresa;
+    private int codigo;
     private String nombre;
 
     //Se crea una ArrayList por la relación entre Departamento y empleado
     private ArrayList<Empleado> listaEmpleados;
 
     //getters y setters
+    public int getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(int codigo) {
+        this.codigo = codigo;
+    }
+
     public String getNombre() {
         return nombre;
     }
@@ -23,25 +34,49 @@ public class Departamento {
     }
 
     //Constructor
-    public Departamento(String nombre, ArrayList<Empleado> listaEmpleados) {
+    public Departamento(Empresa empresa, String nombre) {
+        this.codigo = contador++;
+        this.empresa = empresa;
         this.nombre = nombre;
-        this.listaEmpleados = (listaEmpleados != null) ? listaEmpleados : new ArrayList<>();
+        listaEmpleados = new ArrayList<>();
+
     }
 
     //Método para agregar un empleado a un departamento
     public void agregarEmpleado(Empleado empleado) {
-        try {
-            if (empleado == null) {
-                throw new IllegalArgumentException("El empleado no puede ser nulo.");
-            }
-
-            listaEmpleados.add(empleado);
-            empleado.setDepartamento(this.nombre);
-            System.out.println("Empleado: " + empleado.getNombre() + "\nAgregado a: " + this.nombre);
-
-        } catch (IllegalArgumentException e) {
-            System.out.println("ERROR: " + e.getMessage());
+        if (empleado == null) {
+            System.out.println("ERROR: El empleado no puede ser nulo.");
+            return;
         }
+        if (!listaEmpleados.contains(empleado)) {
+            listaEmpleados.add(empleado);
+            empleado.setDepartamento(this); // Se actualiza el departamento del empleado
+            System.out.println("Empleado '" + empleado.getNombre() + "' agregado al departamento " + nombre);
+        } else {
+            System.out.println("ERROR: El empleado ya pertenece a este departamento.");
+        }
+    }
+
+    //Método para reasignar un empleado a un departamento
+    public boolean reasignarEmpleado(Empleado empleado, Departamento nuevoDepartamento) {
+        if (empleado == null || nuevoDepartamento == null) {
+            System.out.println("ERROR: El empleado o el departamento no pueden ser nulos.");
+            return false;
+        }
+
+        if (!listaEmpleados.contains(empleado)) {
+            System.out.println("ERROR: El empleado '" + empleado.getNombre() + "' no pertenece a este departamento.");
+            return false;
+        }
+
+        // Remover del departamento actual
+        listaEmpleados.remove(empleado);
+
+        // Agregar al nuevo departamento
+        nuevoDepartamento.agregarEmpleado(empleado);
+
+        System.out.println("Empleado '" + empleado.getNombre() + "' fue reasignado a " + nuevoDepartamento.getNombre());
+        return true;
     }
 
     //Método para eliminar un empleado mediante el id
@@ -82,16 +117,6 @@ public class Departamento {
                 + this.nombre.toUpperCase());
     }
 
-    // Modificar el nombre del departamento
-    public void actualizarDepartamento(String nuevoNombre) {
-        if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) {
-            System.out.println("ERROR: El nombre del departamento no puede estar vacío o nulo.");
-            return;
-        }
-        this.nombre = nuevoNombre;
-        System.out.println("Nombre del departamento actualizado a " + nuevoNombre);
-    }
-
     // Mostrar todos los empleados del departamento
     public void listarEmpleados() {
         System.out.println("Empleados en el departamento " + nombre + ":");
@@ -102,6 +127,15 @@ public class Departamento {
                 System.out.println(emp);
             }
         }
+    }
+
+    public void eliminarEmpleado(Empleado e) {
+        listaEmpleados.remove(e);
+    }
+
+    @Override
+    public String toString() {
+        return this.nombre;
     }
 
 }
